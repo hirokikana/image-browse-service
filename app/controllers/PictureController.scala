@@ -1,6 +1,7 @@
 package controllers
 
 import java.nio.file.Paths
+
 import javax.inject.Inject
 import play.api.Configuration
 import play.api.Logger
@@ -10,14 +11,21 @@ import play.api.mvc.AbstractController
 import play.api.mvc.AnyContent
 import play.api.mvc.ControllerComponents
 import play.api.mvc.Request
+
 import scala.util.Random
 import com.redis._
 
-class PictureController @Inject()(cc: ControllerComponents, config: Configuration) extends AbstractController(cc) {
+import scala.concurrent.ExecutionContext
+
+class PictureController @Inject()(cc: ControllerComponents, config: Configuration)(implicit ec: ExecutionContext) extends AbstractController(cc) {
   private val logger = Logger(this.getClass)
 
   private def getSavePath() :String = {
     config.get[String]("storage.directory") + "hogefuga" + generateId() +  ".jpg"
+  }
+
+  private def getSavePath(id: String) :String = {
+    config.get[String]("storage.directory") + "hogefuga" + id +  ".jpg"
   }
 
   private def createSuccessResponseJson(body:Map[String, String]): JsObject = {
@@ -42,6 +50,12 @@ class PictureController @Inject()(cc: ControllerComponents, config: Configuratio
     }
   }
 
+  def get(id: String) = Action {
+    Ok.sendFile(
+      content = new java.io.File(getSavePath(id)),
+      inline = true
+    )
+  }
 
   def post() = Action(parse.multipartFormData) { request =>
     request.body.file("image").map { picture =>
