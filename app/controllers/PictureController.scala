@@ -5,8 +5,7 @@ import java.nio.file.Paths
 import javax.inject.Inject
 import play.api.Configuration
 import play.api.Logger
-import play.api.libs.json.JsObject
-import play.api.libs.json.Json
+import play.api.libs.json._
 import play.api.mvc.AbstractController
 import play.api.mvc.AnyContent
 import play.api.mvc.ControllerComponents
@@ -14,8 +13,11 @@ import play.api.mvc.Request
 
 import scala.util.Random
 import com.redis._
+import modules.Tags
+import play.api.libs.json
 
 import scala.concurrent.ExecutionContext
+import scala.language.postfixOps
 
 class PictureController @Inject()(cc: ControllerComponents, config: Configuration)(implicit ec: ExecutionContext) extends AbstractController(cc) {
   private val logger = Logger(this.getClass)
@@ -62,9 +64,9 @@ class PictureController @Inject()(cc: ControllerComponents, config: Configuratio
       val filepath = getSavePath()
       picture.ref.moveFileTo(Paths.get(filepath), true)
       val body = Map("id" -> filepath)
-      Ok(Json.stringify(createSuccessResponseJson(body)))
+      Ok(createSuccessResponseJson(body))
     }.getOrElse {
-      Ok(Json.stringify(createFailResponseJson()))
+      Ok(createFailResponseJson())
     }
   }
 }
