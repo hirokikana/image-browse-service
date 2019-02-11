@@ -6,10 +6,7 @@ import javax.inject.Inject
 import play.api.Configuration
 import play.api.Logger
 import play.api.libs.json._
-import play.api.mvc.AbstractController
-import play.api.mvc.AnyContent
-import play.api.mvc.ControllerComponents
-import play.api.mvc.Request
+import play.api.mvc._
 
 import scala.util.Random
 import com.redis._
@@ -52,7 +49,7 @@ class PictureController @Inject()(cc: ControllerComponents, config: Configuratio
     }
   }
 
-  def get(id: String) = Action {
+  def get(id: String): Action[AnyContent] = Action {
     Ok.sendFile(
       content = new java.io.File(getSavePath(id)),
       inline = true

@@ -12,6 +12,7 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.mongodb.scala.model.Updates._
 import org.mongodb.scala.model.Filters._
+import org.mongodb.scala.result.UpdateResult
 import play.api.libs.json.Json
 
 case class TagRepository(config: Configuration) {
@@ -45,7 +46,7 @@ case class TagRepository(config: Configuration) {
     )
   }
 
-  def addTags(contentId: Int, tags: Tags) = {
+  def addTags(contentId: Int, tags: Tags): UpdateResult = {
     val collection: MongoCollection[Document] = getClient().getCollection("imagebrowseservice")
     val document: Document = Document(
       "contentId" -> contentId,
