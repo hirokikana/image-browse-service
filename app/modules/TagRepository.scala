@@ -12,21 +12,32 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.mongodb.scala.model.Updates._
 import org.mongodb.scala.model.Filters._
+import play.api.libs.json.Json
 
 case class TagRepository(config: Configuration) {
   private def getClient(): MongoDatabase = {
     MongoClient().getDatabase("test")
   }
 
-  def findById(contnteId: Int): Tags = {
-    Tags(contnteId, List("a", "b"))
+  def findById(contentId: Int): Tags = {
+    val collection: MongoCollection[Document] = getClient().getCollection("imagebrowseservice")
+    val response = Await.result(
+      collection.find(Document("contentId" -> contentId)).toFuture(),
+      Duration.Inf
+    )
+
+    Tags(contentId,
+      response.map{_.toJson match {
+        case s: String => Json.parse(s).validate[Tags].get.tagList
+      }}.last
+    )
   }
 
   def addTags(contentId: Int, tags: Tags) = {
     val collection: MongoCollection[Document] = getClient().getCollection("imagebrowseservice")
     val document: Document = Document(
       "contentId" -> contentId,
-      "tags" -> tags.tagList
+      "tagList" -> tags.tagList
     )
     val replaceOption = new ReplaceOptions().upsert(true)
     Await.result(

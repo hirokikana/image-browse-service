@@ -32,8 +32,9 @@ class TagsController @Inject()(cc: ControllerComponents, config: Configuration) 
     val client = getClient()
     client.smembers(config.get[String]("redis.key_prefix") + "tags_" + pictureId) match {
       case Some(s) =>
-        val response = s.flatten.map { JsString(_) }
-        Ok(Json.toJson(response))
+        val tagRepository: TagRepository = TagRepository(config)
+        val response = tagRepository.findById(pictureId)
+        Ok(Json.arr(response.tagList))
       case None =>
         BadRequest("not found")
     }
