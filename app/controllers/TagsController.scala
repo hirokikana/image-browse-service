@@ -2,7 +2,7 @@ package controllers
 
 import com.redis.RedisClient
 import javax.inject.Inject
-import modules.Tags
+import modules.{TagRepository, Tags}
 import play.api.Configuration
 import play.api.libs.json._
 import play.api.mvc.{AbstractController, ControllerComponents}
@@ -17,13 +17,8 @@ class TagsController @Inject()(cc: ControllerComponents, config: Configuration) 
     request.body.asJson.map { json =>
       json.validate[Tags] match {
         case play.api.libs.json.JsSuccess(value, path) =>
-          val client = getClient()
-          value.tagList.foreach { tag =>
-            client.sadd(
-              config.get[String]("redis.key_prefix") + "tags_" + pictureId,
-              tag
-            )
-          }
+          val tagRepository: TagRepository = TagRepository(config)
+          tagRepository.addTags(pictureId, value)
           Ok(json)
         case play.api.libs.json.JsError(errors) =>
           BadRequest(JsError.toJson(errors))

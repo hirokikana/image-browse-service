@@ -9,8 +9,12 @@ scalaVersion := "2.12.8"
 
 libraryDependencies += guice
 libraryDependencies += "org.scalatestplus.play" %% "scalatestplus-play" % "4.0.1" % Test
+
 libraryDependencies ++= Seq(
     "net.debasishg" %% "redisclient" % "3.9"
+)
+libraryDependencies ++= Seq(
+    "org.mongodb.scala" %% "mongo-scala-driver" % "2.4.2"
 )
 // Adds additional packages into Twirl
 //TwirlKeys.templateImports += "com.hirokikana.controllers._"
