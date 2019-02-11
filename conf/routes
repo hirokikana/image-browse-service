@@ -14,3 +14,5 @@ GET      /api/v1/picture/:id        controllers.PictureController.get(id)
 
 POST     /api/v1/picture/:picture_id/tags   controllers.TagsController.post(picture_id: Int)
 GET      /api/v1/picture/:picture_id/tags   controllers.TagsController.get(picture_id: Int)
+
+GET      /api/v1/search     controllers.SearchController.get()

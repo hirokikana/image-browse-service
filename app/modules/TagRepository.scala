@@ -19,6 +19,18 @@ case class TagRepository(config: Configuration) {
     MongoClient().getDatabase("test")
   }
 
+  def findByTag(tag: String): List[Int] = {
+    val collection: MongoCollection[Document] = getClient().getCollection("imagebrowseservice")
+    val response = Await.result(
+      collection.find(Document("tagList" -> tag)).toFuture(),
+      Duration.Inf
+    )
+
+    response.map{_.toJson match {
+      case s: String => Json.parse(s).validate[Tags].get.contentId
+    }}.toList
+  }
+
   def findById(contentId: Int): Tags = {
     val collection: MongoCollection[Document] = getClient().getCollection("imagebrowseservice")
     val response = Await.result(
