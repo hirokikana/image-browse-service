@@ -7,7 +7,7 @@ import org.mongodb.scala.model.{ReplaceOptions, UpdateOptions}
 import org.mongodb.scala.{MongoClient, MongoCollection, MongoDatabase}
 import play.api.Configuration
 
-import scala.concurrent.Await
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.mongodb.scala.model.Updates._
@@ -15,9 +15,32 @@ import org.mongodb.scala.model.Filters._
 import org.mongodb.scala.result.UpdateResult
 import play.api.libs.json.Json
 
-case class TagRepository(config: Configuration) {
+case class Tag(val name: String)
+case class Content(val id:Int, val tags:List[Tag])
+
+sealed trait TagRepositoryError
+case object BackendDatabaseConnectionError extends TagRepositoryError
+
+class TagRepository(config: Configuration) {
+  private val databaseName: String = "test"
+  private val collectionName: String = "imagebrowseservice"
+
+  private def getCollection(): MongoCollection[Document] = {
+    MongoClient().getDatabase(databaseName).getCollection(collectionName)
+  }
+
+  def findContent(tag: Tag): Either[TagRepositoryError, List[Tags]] = {
+    val collection: MongoCollection[Document] = getCollection()
+    val future:Future[Seq[Document]] = collection.find(Document("tagList" -> tag.name)).toFuture()
+    val result[Seq[Tag]] = for {
+      docs <- future
+      doc <- docs
+    } yield Tag(doc.toString())
+    result
+  }
+  
   private def getClient(): MongoDatabase = {
-    MongoClient().getDatabase("test")
+    MongoClient().getDatabase(databaseName)
   }
 
   def findByTag(tag: String): List[Int] = {
