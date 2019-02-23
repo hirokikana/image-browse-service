@@ -17,7 +17,7 @@ class TagsController @Inject()(cc: ControllerComponents, config: Configuration) 
     request.body.asJson.map { json =>
       json.validate[Tags] match {
         case play.api.libs.json.JsSuccess(value, path) =>
-          val tagRepository: TagRepository = TagRepository(config)
+          val tagRepository: TagRepository = new TagRepository(config)
           tagRepository.addTags(pictureId, value)
           Ok(json)
         case play.api.libs.json.JsError(errors) =>
@@ -32,7 +32,7 @@ class TagsController @Inject()(cc: ControllerComponents, config: Configuration) 
     val client = getClient()
     client.smembers(config.get[String]("redis.key_prefix") + "tags_" + pictureId) match {
       case Some(s) =>
-        val tagRepository: TagRepository = TagRepository(config)
+        val tagRepository: TagRepository = new TagRepository(config)
         val response = tagRepository.findById(pictureId)
         Ok(Json.arr(response.tagList))
       case None =>

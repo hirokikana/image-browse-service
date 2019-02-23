@@ -15,6 +15,8 @@ import org.mongodb.scala.model.Filters._
 import org.mongodb.scala.result.UpdateResult
 import play.api.libs.json.Json
 
+import scala.util.{Failure, Success}
+
 case class Tag(val name: String)
 case class Content(val id:Int, val tags:List[Tag])
 
@@ -29,16 +31,21 @@ class TagRepository(config: Configuration) {
     MongoClient().getDatabase(databaseName).getCollection(collectionName)
   }
 
-  def findContent(tag: Tag): Either[TagRepositoryError, List[Tags]] = {
+  def findContent(tag: Tag): Either[TagRepositoryError, List[String]] = {
     val collection: MongoCollection[Document] = getCollection()
-    val future:Future[Seq[Document]] = collection.find(Document("tagList" -> tag.name)).toFuture()
-    val result[Seq[Tag]] = for {
-      docs <- future
-      doc <- docs
-    } yield Tag(doc.toString())
+    val result:Either[TagRepositoryError, List[String]] = Await.result(for {
+      docs <- collection.find(Document("tagList" -> tag.name)).toFuture()
+    } yield docs.map {
+      _.toString() match {
+        case v: String => Tag(v)
+      }
+    }, Duration.Inf) match {
+      case v: List[String] => Right(v)
+      case _ => Left(BackendDatabaseConnectionError)
+    }
     result
   }
-  
+
   private def getClient(): MongoDatabase = {
     MongoClient().getDatabase(databaseName)
   }
