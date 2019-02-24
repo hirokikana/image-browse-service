@@ -15,9 +15,9 @@ import play.api.libs.json
 import scala.concurrent.ExecutionContext
 import scala.language.postfixOps
 
-class PictureController @Inject()(cc: ControllerComponents,
-                                  config: Configuration,
-                                  redisClient: RedisClient
+class ContentsController @Inject()(cc: ControllerComponents,
+                                   config: Configuration,
+                                   redisClient: RedisClient
                                  )(implicit ec: ExecutionContext) extends AbstractController(cc) {
 
   private def getSavePath() :String = {
