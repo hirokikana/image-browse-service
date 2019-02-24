@@ -10,14 +10,15 @@ import play.api.mvc._
 
 import scala.util.Random
 import com.redis._
-import modules.Tags
 import play.api.libs.json
 
 import scala.concurrent.ExecutionContext
 import scala.language.postfixOps
 
-class PictureController @Inject()(cc: ControllerComponents, config: Configuration)(implicit ec: ExecutionContext) extends AbstractController(cc) {
-  private val logger = Logger(this.getClass)
+class PictureController @Inject()(cc: ControllerComponents,
+                                  config: Configuration,
+                                  redisClient: RedisClient
+                                 )(implicit ec: ExecutionContext) extends AbstractController(cc) {
 
   private def getSavePath() :String = {
     config.get[String]("storage.directory") + "hogefuga" + generateId() +  ".jpg"
@@ -42,8 +43,7 @@ class PictureController @Inject()(cc: ControllerComponents, config: Configuratio
   }
 
   private def generateId(): Integer = {
-    val client = new RedisClient(config.get[String]("redis.host"), config.get[Int]("redis.port"))
-    client.incr( config.get[String]("redis.key_prefix") + "id") match {
+    redisClient.incr( config.get[String]("redis.key_prefix") + "id") match {
       case Some(s) => s.toInt
       case None => Random.nextInt()
     }

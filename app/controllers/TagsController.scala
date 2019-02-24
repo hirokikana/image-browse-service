@@ -1,24 +1,22 @@
 package controllers
 
-import com.redis.RedisClient
 import javax.inject.Inject
-import modules.{TagRepository, Tags}
+import modules.entity.{Content, Tag}
+import modules.ContentRepository
 import play.api.Configuration
 import play.api.libs.json._
 import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
 
-class TagsController @Inject()(cc: ControllerComponents, config: Configuration) extends AbstractController(cc){
-
-  private def getClient(): RedisClient = {
-    new RedisClient(config.get[String]("redis.host"), config.get[Int]("redis.port"))
-  }
+class TagsController @Inject()(cc: ControllerComponents,
+                               config: Configuration,
+                               contentRepository: ContentRepository
+                              ) extends AbstractController(cc){
 
   def post(pictureId: Int): Action[AnyContent] = Action { request =>
     request.body.asJson.map { json =>
-      json.validate[Tags] match {
+      json.validate[Content] match {
         case play.api.libs.json.JsSuccess(value, path) =>
-          val tagRepository: TagRepository = new TagRepository(config)
-          tagRepository.addTags(pictureId, value)
+          contentRepository.update(value)
           Ok(json)
         case play.api.libs.json.JsError(errors) =>
           BadRequest(JsError.toJson(errors))
@@ -29,6 +27,7 @@ class TagsController @Inject()(cc: ControllerComponents, config: Configuration) 
   }
 
   def get(pictureId: Int): Action[AnyContent] = Action {
+    /*
     val client = getClient()
     client.smembers(config.get[String]("redis.key_prefix") + "tags_" + pictureId) match {
       case Some(s) =>
@@ -38,5 +37,7 @@ class TagsController @Inject()(cc: ControllerComponents, config: Configuration) 
       case None =>
         BadRequest("not found")
     }
+    */
+    Ok("fjdskalfjdskal")
   }
 }
