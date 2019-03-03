@@ -15,22 +15,51 @@ import play.api.libs.json.{JsNumber, Json}
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class SearchControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecting with MockitoSugar{
+class SearchControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecting with MockitoSugar {
   "SearchController GET" should {
-    "aaaaaaaaa" in {
-
+    "1件結果を返す" in {
       val contentService = mock[ContentService]
       when(contentService.findByTag(any[Tag])).thenReturn(
         Future(List(Content(1, List(Tag("test")))))
       )
       val controller = new SearchController(stubControllerComponents(), contentService)
       val search = controller.get().apply(FakeRequest(GET, "/api/v1/search?tag=test"))
-
       status(search) mustBe OK
       contentType(search) mustBe Some("application/json")
       val jsonResult = contentAsJson(search)
-      jsonResult mustBe Json.arr(Json.arr(Json.obj("id" -> JsNumber(1))))
+      jsonResult mustBe Json.arr(Json.obj("id" -> JsNumber(1)))
+    }
+
+    "複数件結果を返す" in {
+      val contentService = mock[ContentService]
+      when(contentService.findByTag(any[Tag])).thenReturn(
+        Future(List(
+          Content(1, List(Tag("test"))),
+          Content(2, List(Tag("test"))),
+        ))
+      )
+      val controller = new SearchController(stubControllerComponents(), contentService)
+      val search = controller.get().apply(FakeRequest(GET, "/api/v1/search?tag=test"))
+      status(search) mustBe OK
+      contentType(search) mustBe Some("application/json")
+      val jsonResult = contentAsJson(search)
+      jsonResult mustBe Json.arr(
+        Json.obj("id" -> JsNumber(1)),
+        Json.obj("id" -> JsNumber(2))
+      )
+    }
+
+    "結果が0件" in {
+      val contentService = mock[ContentService]
+      when(contentService.findByTag(any[Tag])).thenReturn(
+        Future(List())
+      )
+      val controller = new SearchController(stubControllerComponents(), contentService)
+      val search = controller.get().apply(FakeRequest(GET, "/api/v1/search?tag=test"))
+      status(search) mustBe OK
+      contentType(search) mustBe Some("application/json")
+      val jsonResult = contentAsJson(search)
+      jsonResult mustBe Json.arr()
     }
   }
-
 }

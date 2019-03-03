@@ -16,6 +16,6 @@ class SearchController @Inject()(cc: ControllerComponents,
   def get(): Action[AnyContent] = Action { request =>
     val requestTag: String = request.getQueryString("tag").getOrElse("")
     val result = Await.result(contentService.findByTag(Tag(requestTag)), Duration.Inf)
-    Ok(Json.arr(result.map(x => Json.obj("id" -> JsNumber(x.id)))))
+    Ok(Json.toJson(result.map(x => Json.obj("id" -> JsNumber(x.id)))))
   }
 }
