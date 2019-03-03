@@ -17,6 +17,7 @@ libraryDependencies ++= Seq(
     "org.mongodb.scala" %% "mongo-scala-driver" % "2.4.2"
 )
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % "test"
+libraryDependencies += "org.mockito" % "mockito-all" % "1.10.19" % "test"
 // Adds additional packages into Twirl
 //TwirlKeys.templateImports += "com.hirokikana.controllers._"
 
